@@ -14,11 +14,9 @@ const validatePasswordPolicy1 = (limits, toeval, password) => {
 
 const validatePasswordPolicy2 = (limits, toeval, password) => {
     const passwordArray = Array.from(password);
-    const isFirstLimitEqual = passwordArray[limits[0] - 1];
-    const isSecondLimitEqual = passwordArray[limits[1] - 1];
-    const results = [isFirstLimitEqual, isSecondLimitEqual];
-    const isOneOccurence = results.filter(e => e === toeval[0]).length === 1;
-    return isOneOccurence;
+    const isFirstLimitEqual = passwordArray[limits[0] - 1] === toeval[0];
+    const isSecondLimitEqual = passwordArray[limits[1] - 1] === toeval[0];
+    return isFirstLimitEqual !== isSecondLimitEqual;
 }
 
 const day2Solution = () => {
