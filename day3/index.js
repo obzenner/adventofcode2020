@@ -12,9 +12,8 @@ const findTrees = (array, jump = 3, down = 1) => {
 
     while (i < bottomLimit) {
         if (i > down) {
-            side = side < threshold ? side + jump : side + jump - threshold;
-            const remainder = side % threshold;
-            const pointIndex = remainder === 0 ? threshold : remainder;
+            side = side < threshold - jump ? side + jump : side + jump - threshold;
+            const pointIndex = side === 0 ? threshold : side;
             const point = array[i - 1][pointIndex - 1];
             numberOfTrees = point === '#' ? numberOfTrees + 1 : numberOfTrees;
         }
