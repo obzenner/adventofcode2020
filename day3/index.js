@@ -12,11 +12,9 @@ const findTrees = (array, jump = 3, down = 1) => {
 
     while (i < bottomLimit) {
         if (i > down) {
-            side += jump;
-            const numberOfOverlaps = Math.floor(side / threshold);
-            const edgePosition = numberOfOverlaps * threshold;
-            const offset = side - edgePosition;
-            const pointIndex = offset === 0 ? threshold : offset;
+            side = side > threshold ? side - threshold + jump : side + jump;
+            const remainder = side % threshold;
+            const pointIndex = remainder === 0 ? threshold : remainder;
             const point = array[i - 1][pointIndex - 1];
             numberOfTrees = point === '#' ? numberOfTrees + 1 : numberOfTrees;
         }
