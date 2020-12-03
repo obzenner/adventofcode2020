@@ -12,7 +12,7 @@ const findTrees = (array, jump = 3, down = 1) => {
 
     while (i < bottomLimit) {
         if (i > down) {
-            side = side > threshold ? side - threshold + jump : side + jump;
+            side = side < threshold ? side + jump : side + jump - threshold;
             const remainder = side % threshold;
             const pointIndex = remainder === 0 ? threshold : remainder;
             const point = array[i - 1][pointIndex - 1];
