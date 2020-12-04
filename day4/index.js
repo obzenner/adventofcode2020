@@ -44,7 +44,7 @@ const validateFields = (passports, optionalField = 'cid') => {
     return passports.filter(p => {
         const fieldsString = sortAndJoin(p.filter(p => p[0] !== optionalField).map(p => p[0]));
         return sortAndJoin(requiredFields.map(r => r[0])) === fieldsString;
-    }).length;
+    });
 }
 
 const validateFieldsPart2 = (passports) => {
@@ -66,7 +66,7 @@ const validateFieldsPart2 = (passports) => {
         if (validFields.length === requiredFields.length) {
             return passport;
         }
-    }, []);
+    });
 }
 
 const day4Solution = () => {
@@ -74,7 +74,7 @@ const day4Solution = () => {
     const input = rawInput.split('\n');
     const passports = getPassportFields(input);
     return {
-        part1: validateFields(passports),
+        part1: validateFields(passports).length,
         part2: validateFieldsPart2(passports).length
     }
 };
