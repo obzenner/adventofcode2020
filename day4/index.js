@@ -47,22 +47,23 @@ const validateFields = (passports, optionalField = 'cid') => {
     }).length;
 }
 
-const validateFieldsPart2 = (passports, optionalField = 'cid') => {
+const validateFieldsPart2 = (passports) => {
     return passports.filter(passport => {
-        const validator = requiredFields.reduce((acc, field) => {
-            const passportField = passport.find(p => p[0] === field[0]);
+        const validFields = requiredFields.reduce((acc, field) => {
+            const fieldName = field[0];
+            const passportField = passport.find(p => p[0] === fieldName);
+
             if (passportField) {
-                const fieldRegex = requiredFields.find(r => r[0] === field[0])[1];
-                const isMatch = passportField[1].match(fieldRegex);
-                acc = [...acc, [field[0], Boolean(isMatch)]]
-                return acc;
+                const fieldRegex = field[1];
+                const passportFieldValue = passportField[1];
+                const isMatch = passportFieldValue.match(fieldRegex);
+                return Boolean(isMatch) ? [...acc, [fieldName, Boolean(isMatch)]] : acc;
             } else {
-                acc = [...acc, [field[0], false]]
                 return acc;
             }
         }, []);
-        
-        if (validator.filter(v => v[1] === true).length === requiredFields.length) {
+
+        if (validFields.length === requiredFields.length) {
             return passport;
         }
     }, []);
