@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-var path = require('path');
+const path = require('path');
 
 const findTrees = (array, jump = 3, down = 1) => {
     const threshold = array[0].length;

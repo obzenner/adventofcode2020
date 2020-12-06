@@ -1,30 +1,8 @@
 'use strict';
 
 const fs = require('fs');
-var path = require('path');
-
-const getPassportFields = (input) => {
-    let passportIndex = 0;
-    let passports = [];
-
-    for (let i = 0; i < input.length; i++) {
-        const line = input[i];
-        if (!passports[passportIndex]) {
-            passports[passportIndex] = [];
-        }
-        if (line !== '') {
-            const fields = line.split(' ').map(f => {
-                const field = f.split(':');
-                return field;
-            });
-            passports[passportIndex] = [...passports[passportIndex], ...fields];
-        } else {
-            passportIndex++;
-        }
-    }
-
-    return passports;
-}
+const path = require('path');
+const { separateByEmptyLine } = require('../utils/index')
 
 const sortAndJoin = (array = []) => {
     return array.sort().join('');
@@ -72,7 +50,7 @@ const validateFieldsPart2 = (passports) => {
 const day4Solution = () => {
     const rawInput = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8').toString();
     const input = rawInput.split('\n');
-    const passports = getPassportFields(input);
+    const passports = separateByEmptyLine(input);
     return {
         part1: validateFields(passports).length,
         part2: validateFieldsPart2(passports).length

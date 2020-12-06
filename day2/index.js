@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-var path = require('path');
+const path = require('path');
 
 const validatePasswordPolicy1 = (limits, toeval, password) => {
     const sortedPassword = Array.from(password).sort();

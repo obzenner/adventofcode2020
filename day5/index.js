@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-var path = require('path');
+const path = require('path');
 
 const LIMITS = {
     rows: [0, 127],
