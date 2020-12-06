@@ -23,6 +23,16 @@ const separateByEmptyLine = (input) => {
     return items;
 }
 
+const intersection = (array) => {
+    return array.reduce((a, b) => a.filter(v => b.includes(v)));
+};
+
+const getUniqueValues = (array) => {
+    return [...new Set(array)];
+}
+
 module.exports = {
-    separateByEmptyLine
+    separateByEmptyLine,
+    getUniqueValues,
+    intersection
 }

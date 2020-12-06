@@ -12,4 +12,4 @@ const day4Result = day4Solution();
 const day5Result = day5Solution();
 const day6Result = day6Solution();
 
-console.log(day6Result, day4Result)
+console.log(day6Result)
