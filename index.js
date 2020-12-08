@@ -6,6 +6,7 @@ const { day4Solution } = require('./day4/index');
 const { day5Solution } = require('./day5/index');
 const { day6Solution } = require('./day6/index');
 const { day7Solution } = require('./day7/index');
+const { day8Solution } = require('./day8/index');
 
 const day1Result = day1Solution();
 const day2Result = day2Solution();
@@ -14,5 +15,6 @@ const day4Result = day4Solution();
 const day5Result = day5Solution();
 const day6Result = day6Solution();
 const day7Result = day7Solution();
+const day8Result = day8Solution();
 
-console.log(day7Result)
+console.log(day8Result)
