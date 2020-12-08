@@ -66,10 +66,9 @@ const getNextJmpOrNopIndex = (instructions, nextJmpOrNopIndex = 0) => {
 }
 
 const findFixedCombination = (instructions, nextJmpOrNopIndex = 0, accValue) => {
-    let isCurrentInstrIndexLast = false;
     const lastInstructionIndex = instructions.length - 1;
 
-   while (!isCurrentInstrIndexLast) {
+   while (true) {
         const nextJmpOrNop = getNextJmpOrNopIndex(instructions, nextJmpOrNopIndex);
         const newInstructions = instructions.reduce((acc, instr, index) => {
             let newInstr = Object.assign({}, instr);
@@ -80,7 +79,7 @@ const findFixedCombination = (instructions, nextJmpOrNopIndex = 0, accValue) => 
         }, []);
 
         accValue = runInstructions(newInstructions);
-        isCurrentInstrIndexLast = accValue.currInstrIndex - 1 === lastInstructionIndex;
+        const isCurrentInstrIndexLast = accValue.currInstrIndex - 1 === lastInstructionIndex;
 
         if (isCurrentInstrIndexLast) {
             return accValue;
@@ -88,8 +87,6 @@ const findFixedCombination = (instructions, nextJmpOrNopIndex = 0, accValue) => 
 
         return findFixedCombination(instructions, nextJmpOrNop.instrIndex + 1, accValue);
     }
-
-   return accValue;
 }
 
 const day8Solution = () => {
