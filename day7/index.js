@@ -71,10 +71,10 @@ const day7Solution = () => {
 
     const allBagsThatContainInput = getAllBagsContainingInput(bags, INPUT_BAG);
     const allBagsInsideTheInput = getAllBagsInsideInput(bags, INPUT_BAG[0])
-    console.log(allBagsInsideTheInput)
 
     return {
-        part1: allBagsThatContainInput.size
+        part1: allBagsThatContainInput.size,
+        part2: allBagsInsideTheInput
     }
 }
 
