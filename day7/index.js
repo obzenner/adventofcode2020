@@ -48,7 +48,7 @@ const day7Solution = () => {
     
     function recursiveBagFinding(bag) {    
         bag = findBag(bag.mutation, bag.color)
-        
+
         if (!bag) return 0
     
         let contentCount = 0;
@@ -56,12 +56,12 @@ const day7Solution = () => {
         //for for every bag in this bag, get the countCount
         for (let i = 0; i < bag.content.length; i++) {
             let content = bag.content[i]
-            
+    
             //add the count of this bag's content to the big counter (plus 1 for itself)
             contentCount += content.quantity * (1 + recursiveBagFinding(content))
         }
-        
-        return contentCount 
+
+        return contentCount;
     
     }
     
