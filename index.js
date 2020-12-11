@@ -1,5 +1,7 @@
 'use strict';
 
+const { numberOfPermutations } = require('./utils/index');
+
 const { day1Solution } = require('./day1/index');
 const { day2Solution } = require('./day2/index');
 const { day3Solution } = require('./day3/index');
@@ -23,3 +25,6 @@ const day9Result = day9Solution();
 const day10Result = day10Solution();
 
 console.log(day10Result)
+
+// stuff
+console.log(numberOfPermutations(Array(4).fill(0)))

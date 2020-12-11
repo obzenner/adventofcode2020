@@ -53,9 +53,7 @@ const part2 = (adapters, min = 1, max = 3) => {
     const paths = Array(maxValue + 1).fill(0);
     paths[0] = 1;
 
-    let index = 1;
-
-    while (index <= maxValue + 1) {
+    for (let index = 1; index <= maxValue + 1; index++) {
         for (let x = 1; x < 4; x++) {
             const value = index - x;
             if (adapters.includes(value)) {
@@ -65,7 +63,6 @@ const part2 = (adapters, min = 1, max = 3) => {
                 }
             }
         }
-        index++;
     }
 
     return paths[paths.length - 1];
@@ -83,6 +80,10 @@ const day10Solution = () => {
 
     const lookupSetOfAdapters = new Set([0, ...adapters, Math.max(...adapters) + 3]);
     const nOfombinations = part2([...lookupSetOfAdapters], 0);
+
+    const numberOfPermutations = [1, 2, 3, 4].reduce((acc, e, i, arr) => {
+        return acc * (arr.length - i);
+    }, 1);
 
     return {
         part1: numberOFOfDiffs['1'] * (numberOFOfDiffs['3'] + 1),

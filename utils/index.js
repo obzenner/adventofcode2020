@@ -31,8 +31,12 @@ const getUniqueValues = (array) => {
     return [...new Set(array)];
 }
 
+// factorial
+const numberOfPermutations = array => array.reduce((acc, e, i) => acc * (array.length - i), 1);
+
 module.exports = {
     separateByEmptyLine,
     getUniqueValues,
-    intersection
+    intersection,
+    numberOfPermutations
 }
