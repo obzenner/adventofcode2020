@@ -31,5 +31,5 @@ const day10Result = day10Solution();
 console.log(day10Result)
 
 // stuff
-console.log(numberOfPermutations(Array(4).fill(0)))
-console.log(heapsPermutations([1,2]))
+console.log(numberOfPermutations(Array(5).fill(0)))
+console.log(heapsPermutations(['toyla','shmoyla','moyla','fafoyla','huhoyla']).length)
