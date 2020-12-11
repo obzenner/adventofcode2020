@@ -48,6 +48,29 @@ const combinations = (value, set, memo = {}) => {
     return memo[value];
 }
 
+const part2 = (adapters, min = 1, max = 3) => {
+    const maxValue = Math.max(...adapters);
+    const paths = Array(maxValue + 1).fill(0);
+    paths[0] = 1;
+
+    let index = 1;
+
+    while (index <= maxValue + 1) {
+        for (let x = 1; x < 4; x++) {
+            const value = index - x;
+            if (adapters.includes(value)) {
+                const incr = paths[index] + paths[value];
+                if (incr) {
+                    paths[index] = incr;
+                }
+            }
+        }
+        index++;
+    }
+
+    return paths[paths.length - 1];
+}
+
 
 const day10Solution = () => {
     const rawInput = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8');
@@ -59,8 +82,7 @@ const day10Solution = () => {
     }, {})
 
     const lookupSetOfAdapters = new Set([0, ...adapters, Math.max(...adapters) + 3]);
-    const lastAdapterValue = [...lookupSetOfAdapters].pop();
-    const nOfombinations = combinations(lastAdapterValue, lookupSetOfAdapters);
+    const nOfombinations = part2([...lookupSetOfAdapters], 0);
 
     return {
         part1: numberOFOfDiffs['1'] * (numberOFOfDiffs['3'] + 1),
