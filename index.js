@@ -1,6 +1,10 @@
 'use strict';
 
-const { numberOfPermutations } = require('./utils/index');
+const {
+    numberOfPermutations,
+    swapByIndex,
+    heapsPermutations
+} = require('./utils/index');
 
 const { day1Solution } = require('./day1/index');
 const { day2Solution } = require('./day2/index');
@@ -28,3 +32,4 @@ console.log(day10Result)
 
 // stuff
 console.log(numberOfPermutations(Array(4).fill(0)))
+console.log(heapsPermutations([1,2]))
