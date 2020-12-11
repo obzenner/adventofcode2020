@@ -16,6 +16,7 @@ const { day7Solution } = require('./day7/index');
 const { day8Solution } = require('./day8/index');
 const { day9Solution } = require('./day9/index');
 const { day10Solution } = require('./day10/index');
+const { day11Solution } = require('./day11/index');
 
 const day1Result = day1Solution();
 const day2Result = day2Solution();
@@ -27,9 +28,10 @@ const day7Result = day7Solution();
 const day8Result = day8Solution();
 const day9Result = day9Solution();
 const day10Result = day10Solution();
+const day11Result = day11Solution();
 
-console.log(day10Result)
+console.log(day11Result)
 
 // stuff
-console.log(numberOfPermutations(Array(5).fill(0)))
-console.log(heapsPermutations(['toyla','shmoyla','moyla','fafoyla','huhoyla']).length)
+// console.log(numberOfPermutations(Array(5).fill(0)))
+// console.log(heapsPermutations(['toyla','shmoyla','moyla','fafoyla','huhoyla']).length)
