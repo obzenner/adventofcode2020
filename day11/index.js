@@ -84,8 +84,6 @@ const repopulateSeats = (seats, interval, numberOfAdjustments = 0) => {
             return newSeats;
         }
 
-        console.count();
-
         return repopulateSeats(newSeats, interval, 0);
     }
 };
@@ -164,8 +162,6 @@ const repopulateSeatsPart2 = (seats, interval, numberOfAdjustments = 0) => {
             return newSeats;
         }
 
-        console.count();
-
         return repopulateSeatsPart2(newSeats, interval, 0);
     }
 }
@@ -187,8 +183,10 @@ const day11Solution = () => {
 
     }, {});
 
+    console.time();
     const finalSeats = repopulateSeats(input.seats, input.interval);
     const finalSeatsPart2 = repopulateSeatsPart2(input.seats, input.interval);
+    console.timeEnd();
 
     return {
         part1: finalSeats.filter(s => s === '#').length,
