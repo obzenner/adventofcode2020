@@ -58,13 +58,13 @@ const getNextSeatIndex = (seatNumber, interval, direction) => {
 
 // PART 1
 const getOccupiedAdjacentSeats = (seats, interval, seatNumber = 1) => {
-    const validatedAdjacentSeats = DIRECTIONS.reduce((acc, direction) => {
+    const validatedOccupiedAdjacentSeats = DIRECTIONS.reduce((acc, direction) => {
         const validatedSeatNumber = getNextSeatIndex(seatNumber, interval, direction);
         const foundSeat = seats[validatedSeatNumber - 1];
         return foundSeat && foundSeat === '#' ? [...acc, foundSeat] : acc;
     }, [])
 
-    return validatedAdjacentSeats;
+    return validatedOccupiedAdjacentSeats;
 }
 
 const repopulateSeatsPart1 = (seats, interval) => {
