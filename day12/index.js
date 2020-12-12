@@ -9,6 +9,7 @@ const returnOppositeCoord = (current) => {
     return COORD_VALUES.find(coord => coord !== current);
 }
 
+// PART 1
 const setNewCourse = ({degree, course, dir}) => {
     switch (degree) {
         case 0:
@@ -100,11 +101,141 @@ const getFinalDestination = (navInstrs) => {
         return {
             coordinates: coordinates,
             instr: navInstr,
-            course: course
+            course
         };
     }, {});
 
     return moveShip(finalDestination);
+}
+
+// PART2
+const setNewCourseWithWP = ({degree, course, dir}) => {
+    const { wx, wy } = course[2];
+    let wpCoords = null;
+
+    switch (degree) {
+        case 0:
+        case 360:
+            return [...course];
+        case 90:
+            if (course[0] === 'x') {
+                if (dir === 'R') {
+                    // y coord becomes -x coord, x coord becomes y coord
+                    course[1] = !course[1];
+                    wpCoords = {wx: wy, wy: -wx};
+                } else if (dir === 'L') {
+                    // y coord becomes x coord, x cord becomes -y coord
+                    wpCoords = {wx: -wy, wy: wx};
+                }
+            } else {
+                if (dir === 'L') {
+                    // x coord becomes -y coord, y coord becomes x coord
+                    course[1] = !course[1];
+                    wpCoords = {wx: -wy, wy: wx};
+                } else if (dir === 'R') {
+                    // x coord becomes y coord, y coord becomes -x coord
+                    wpCoords = {wx: wy, wy: -wx};
+                }
+            }
+            course[0] = returnOppositeCoord(course[0]);
+            course[2] = wpCoords;
+            return [...course];
+        case 270:
+            if (course[0] === 'x') {
+                if (dir === 'L') {
+                    // y coord becomes -x coord, x coord becomes y coord
+                    course[1] = !course[1];
+                    wpCoords = {wx: wy, wy: -wx};
+                } else if (dir == 'R') {
+                    // y coord becomes x coord, x coord becomes -y coord
+                    wpCoords = {wx: -wy, wy: wx};
+                }
+            } else {
+                if (dir === 'R') {
+                    // x coord becomes -y coord, y coord becomes x coord
+                    course[1] = !course[1];
+                    wpCoords = {wx: -wy, wy: wx};
+                } else if (dir === 'L') {
+                     // x coord becomees y coord, y coord becomes -x coord
+                     wpCoords = {wx: wy, wy: -wx};
+                }
+            }
+            course[0] = returnOppositeCoord(course[0]);
+            course[2] = {...wpCoords};
+            return [...course];
+        case 180:
+            wpCoords = {wx: -wx, wy: -wy};
+            course[2] = {...wpCoords};
+            course[1] = !course[1];
+            return [...course];
+        default:
+            return [...course];
+    }
+}
+
+const moveShipWithWayPoint = ({coordinates = {x: 0, y: 0}, instr, course = ['x', true, {wx: 10, wy: 1}]}) => {
+    const { navInstr, value } = instr;
+    const { x, y } = coordinates;
+    const { wx, wy } = course[2];
+    let newWPCoordinates = null;
+    let newShipCoordinates = null;
+    let newCourse = null;
+
+
+    switch (navInstr) {
+        case 'E':
+            newWPCoordinates = {wy, wx: wx + value};
+            course[2] = newWPCoordinates;
+            break;
+        case 'S':
+            newWPCoordinates = {wx, wy: wy - value};
+            course[2] = newWPCoordinates;
+            break;
+        case 'W':
+            newWPCoordinates = {wy, wx: wx - value};
+            course[2] = newWPCoordinates;
+            break;
+        case 'N':
+            newWPCoordinates = {wx, wy: wy + value};
+            course[2] = newWPCoordinates;
+            break;
+        case 'R':
+        case 'L':
+            newCourse = setNewCourseWithWP({degree: value, course, dir: navInstr});
+            break;
+        case 'F':
+            newShipCoordinates = {x: x + value*wx, y: y + value*wy};
+            break;
+    };
+
+    return {
+        coordinates: newShipCoordinates || {...coordinates},
+        course: newCourse || [...course]
+    }
+}
+
+const getFinalDestinationWithWaypoint = (navInstrs) => {
+    const initialState = {
+        coordinates: {x: 0, y: 0},
+        instr: navInstrs[0],
+        course: ['x', true, { wx: 10, wy: 1}]
+    };
+
+    const finalDestination = navInstrs.reduce((acc, navInstr) => {
+        if (!Object.keys(acc).length) {
+            return initialState;
+        }
+
+        const {coordinates, course} = moveShipWithWayPoint(acc);
+
+        return {
+            coordinates: coordinates,
+            instr: navInstr,
+            course: course
+        };
+    }, {});
+
+    return moveShipWithWayPoint(finalDestination);
 }
 
 const day12Solution = () => {
@@ -118,10 +249,11 @@ const day12Solution = () => {
     }, [])
 
     const { coordinates } = getFinalDestination(navigationInstructions);
+    const withWaypoint = getFinalDestinationWithWaypoint(navigationInstructions);
 
     return {
         part1: Math.abs(coordinates.x) + Math.abs(coordinates.y),
-        part2: null
+        part2: Math.abs(withWaypoint.coordinates.x) + Math.abs(withWaypoint.coordinates.y)
     }
 }
 
