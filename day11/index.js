@@ -3,48 +3,49 @@
 const fs = require("fs");
 const path = require('path');
 
+const DIRECTIONS = ['left', 'right', 'top', 'bottom', 'diagTopLeft', 'diagTopRight', 'diagBottomLeft', 'diagBottomRight'];
 
-const getLineNumber = (seatNumber, interval) => {
-    return Math.ceil(seatNumber / interval);
+const getLineNumber = (seat, interval) => {
+    return Math.ceil(seat / interval);
 }
 
-const isValidLine = (currentSeat, adjacentSeat, interval) => {
-    return getLineNumber(currentSeat, interval) === getLineNumber(adjacentSeat, interval);
+const isValidLine = (testSeat, adjacentSeat, interval) => {
+    return getLineNumber(testSeat, interval) === getLineNumber(adjacentSeat, interval);
 };
 
-const validator = (seatNumber, adjacentSeat, direction, interval) => {
-    let currentSeatNumber = null;
+const validator = (seat, adjacentSeat, direction, interval) => {
+    let testSeat = null;
 
     switch (direction) {
         case 'left':
         case 'right':
-            currentSeatNumber = seatNumber;
+            testSeat = seat;
             break;
         case 'top':
         case 'bottom':
-            currentSeatNumber = adjacentSeat;
+            testSeat = adjacentSeat;
             break;
-        case 'diagonalTopLeft':
-        case 'diagonalTopRight':
-            currentSeatNumber = seatNumber - interval;
+        case 'diagTopLeft':
+        case 'diagTopRight':
+            testSeat = seat - interval;
             break;
-        case 'diagonalBottomLeft':
-        case 'diagonalBottomRight':
-            currentSeatNumber = seatNumber + interval;
+        case 'diagBottomLeft':
+        case 'diagBottomRight':
+            testSeat = seat + interval;
             break;
     };
 
-    return isValidLine(currentSeatNumber, adjacentSeat, interval) ? adjacentSeat : null;
+    return isValidLine(testSeat, adjacentSeat, interval) ? adjacentSeat : null;
 }
 
 const nextSeatNumberDirectionRules = (seatNumber, interval) => {
     return {
         left: seatNumber - 1,
-        diagonalTopLeft: seatNumber - 1 - interval,
-        diagonalBottomLeft: seatNumber - 1 + interval,
+        diagTopLeft: seatNumber - 1 - interval,
+        diagBottomLeft: seatNumber - 1 + interval,
         right: seatNumber + 1,
-        diagonalTopRight: seatNumber + 1 - interval,
-        diagonalBottomRight: seatNumber + 1 + interval,
+        diagTopRight: seatNumber + 1 - interval,
+        diagBottomRight: seatNumber + 1 + interval,
         top: seatNumber - interval,
         bottom: seatNumber + interval
     }
@@ -56,13 +57,11 @@ const getNextSeatIndex = (seatNumber, interval, direction) => {
 }
 
 // PART 1
-const getAdjacentSeats = (seats, interval, seatNumber = 1) => {
-    const directions = Object.keys(nextSeatNumberDirectionRules());
-
-    const validatedAdjacentSeats = directions.reduce((acc, direction) => {
-        const validatedSeat = getNextSeatIndex(seatNumber, interval, direction);
-        acc = [...acc, seats[validatedSeat - 1]]
-        return acc;
+const getOccupiedAdjacentSeats = (seats, interval, seatNumber = 1) => {
+    const validatedAdjacentSeats = DIRECTIONS.reduce((acc, direction) => {
+        const validatedSeatNumber = getNextSeatIndex(seatNumber, interval, direction);
+        const foundSeat = seats[validatedSeatNumber - 1];
+        return foundSeat && foundSeat === '#' ? [...acc, foundSeat] : acc;
     }, [])
 
     return validatedAdjacentSeats;
@@ -73,12 +72,12 @@ const repopulateSeatsPart1 = (seats, interval) => {
 
     while (true) {
         newSeats = seats.reduce((acc, seat, index) => {
-            const adjacentSeats = getAdjacentSeats(seats, interval, index + 1);
-            const hasOccupiedSeats = adjacentSeats.filter(s => s === '#');
+            const adjacentSeats = getOccupiedAdjacentSeats(seats, interval, index + 1);
+            const occupiedSeatsNumber = adjacentSeats.filter(s => s === '#').length;
             
-            if (seat === 'L' && hasOccupiedSeats.length === 0) {
+            if (seat === 'L' && occupiedSeatsNumber === 0) {
                 return [...acc, '#'];
-            } else if (seat === '#' && hasOccupiedSeats.length >= 4) {
+            } else if (seat === '#' && occupiedSeatsNumber >= 4) {
                 return [...acc, 'L'];
             }
     
@@ -117,24 +116,19 @@ const getVisibleSeatsInDirection = (seats, seatNumber = 40, interval = 10, direc
 }
 
 const repopulateSeatsPart2 = (seats, interval) => {
-    const directions = Object.keys(nextSeatNumberDirectionRules());
     let newSeats = [];
 
     while (true) {
         newSeats = seats.reduce((acc, seat, index) => {
             const seatNumber = index + 1;
-            const allVisibleSeats = directions.reduce((a, direction) => {
+            const occupiedSeatsNumber = DIRECTIONS.reduce((a, direction) => {
                 const foundSeat = getVisibleSeatsInDirection(seats, seatNumber, interval, direction);
-                if (foundSeat) {
-                    a = [...a, foundSeat];
-                }
-                return a;
-            }, [])
-            const occupiedSeats = allVisibleSeats.filter(seat => seat === '#');
+                return foundSeat && foundSeat === '#' ? [...a, foundSeat] : a;
+            }, []).length;
 
-            if (seat === 'L' && occupiedSeats.length === 0) {
+            if (seat === 'L' && occupiedSeatsNumber === 0) {
                 return [...acc, '#'];
-            } else if (seat === '#' && occupiedSeats.length >= 5) {
+            } else if (seat === '#' && occupiedSeatsNumber >= 5) {
                 return [...acc, 'L'];
             }
 
