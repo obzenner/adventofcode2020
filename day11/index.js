@@ -8,107 +8,94 @@ const getLineNumber = (seatNumber, interval) => {
     return Math.ceil(seatNumber / interval);
 }
 
-const isSameLine = (currentSeat, adjacentSeat, interval) => {
+const isValidLine = (currentSeat, adjacentSeat, interval) => {
     return getLineNumber(currentSeat, interval) === getLineNumber(adjacentSeat, interval);
 };
 
 const validator = (seatNumber, adjacentSeat, direction, interval) => {
+    let currentSeatNumber = null;
+
     switch (direction) {
         case 'left':
         case 'right':
-            return isSameLine(seatNumber, adjacentSeat, interval) ? adjacentSeat : null;
+            currentSeatNumber = seatNumber;
+            break;
         case 'top':
         case 'bottom':
-            return adjacentSeat;
+            currentSeatNumber = adjacentSeat;
+            break;
         case 'diagonalTopLeft':
         case 'diagonalTopRight':
-            return isSameLine(seatNumber - interval, adjacentSeat, interval) ? adjacentSeat : null;
+            currentSeatNumber = seatNumber - interval;
+            break;
         case 'diagonalBottomLeft':
         case 'diagonalBottomRight':
-            return isSameLine(seatNumber + interval, adjacentSeat, interval) ? adjacentSeat : null;
-    };
-}
-
-const getAdjacentSeats = (seats, interval, seatNumber = 1) => {
-    const adjacentSeatNumbers = {
-        left: seatNumber - 1,
-        diagonalTopLeft: seatNumber - interval - 1,
-        diagonalBottomLeft: seatNumber + interval - 1,
-        right: seatNumber + 1,
-        diagonalTopRight: seatNumber - interval + 1,
-        diagonalBottomRight: seatNumber + interval + 1,
-        top: seatNumber - interval,
-        bottom: seatNumber + interval
+            currentSeatNumber = seatNumber + interval;
+            break;
     };
 
-    const validatedAdjacentSeats = Object.keys(adjacentSeatNumbers).reduce((acc, key) => {
-        const validatedSeat = validator(seatNumber, adjacentSeatNumbers[key], key, interval);
-        acc[key] = validatedSeat;
-        return acc;
-    }, {})
-
-    const adjacentSeats = Object.keys(validatedAdjacentSeats).reduce((acc, seatKey) => {
-        const seatIndex = validatedAdjacentSeats[seatKey] - 1;
-        acc[seatKey] = seats[seatIndex];
-        return acc;
-    }, {});
-
-    return adjacentSeats;
+    return isValidLine(currentSeatNumber, adjacentSeat, interval) ? adjacentSeat : null;
 }
-
-const repopulateSeats = (seats, interval, numberOfAdjustments = 0) => {
-    let newSeats = [];
-
-    while (true) {
-        newSeats = [...seats.reduce((acc, seat, index) => {
-            const adjacentSeats = getAdjacentSeats(seats, interval, index + 1);
-            const hasOccupiedSeats = Object.keys(adjacentSeats).reduce((a, key) => {
-                const seatValue = adjacentSeats[key];
-                    return seatValue === '#' ? [...a, seatValue] : a;
-            }, []);
-    
-            if (seat === 'L' && hasOccupiedSeats.length === 0) {
-                numberOfAdjustments++;
-                return [...acc, '#'];
-            } else if (seat === '#' && hasOccupiedSeats.length >= 4) {
-                numberOfAdjustments++;
-                return [...acc, 'L'];
-            } else {
-                acc = [...acc, seat];
-            }
-    
-            return acc;
-        }, [])]
-
-        if (numberOfAdjustments === 0) {
-            return newSeats;
-        }
-
-        return repopulateSeats(newSeats, interval, 0);
-    }
-};
-
 
 const nextSeatNumberDirectionRules = (seatNumber, interval) => {
     return {
         left: seatNumber - 1,
-        diagonalTopLeft: seatNumber - interval - 1,
-        diagonalBottomLeft: seatNumber + interval - 1,
+        diagonalTopLeft: seatNumber - 1 - interval,
+        diagonalBottomLeft: seatNumber - 1 + interval,
         right: seatNumber + 1,
-        diagonalTopRight: seatNumber - interval + 1,
-        diagonalBottomRight: seatNumber + interval + 1,
+        diagonalTopRight: seatNumber + 1 - interval,
+        diagonalBottomRight: seatNumber + 1 + interval,
         top: seatNumber - interval,
         bottom: seatNumber + interval
     }
 };
-
 
 const getNextSeatIndex = (seatNumber, interval, direction) => {
     const adjacentSeat = nextSeatNumberDirectionRules(seatNumber, interval)[direction];
     return validator(seatNumber, adjacentSeat, direction, interval);
 }
 
-const findVisibleSeatsInDirection = (seats, seatNumber = 40, interval = 10, direction = 'top') => {
+// PART 1
+const getAdjacentSeats = (seats, interval, seatNumber = 1) => {
+    const directions = Object.keys(nextSeatNumberDirectionRules());
+
+    const validatedAdjacentSeats = directions.reduce((acc, direction) => {
+        const validatedSeat = getNextSeatIndex(seatNumber, interval, direction);
+        acc = [...acc, seats[validatedSeat - 1]]
+        return acc;
+    }, [])
+
+    return validatedAdjacentSeats;
+}
+
+const repopulateSeatsPart1 = (seats, interval) => {
+    let newSeats = [];
+
+    while (true) {
+        newSeats = seats.reduce((acc, seat, index) => {
+            const adjacentSeats = getAdjacentSeats(seats, interval, index + 1);
+            const hasOccupiedSeats = adjacentSeats.filter(s => s === '#');
+            
+            if (seat === 'L' && hasOccupiedSeats.length === 0) {
+                return [...acc, '#'];
+            } else if (seat === '#' && hasOccupiedSeats.length >= 4) {
+                return [...acc, 'L'];
+            }
+    
+            return [...acc, seat];
+        }, [])
+
+        if (JSON.stringify(seats) === JSON.stringify(newSeats)) {
+            return newSeats;
+        }
+
+        return repopulateSeatsPart1(newSeats, interval);
+    }
+};
+
+
+// PART 2
+const getVisibleSeatsInDirection = (seats, seatNumber = 40, interval = 10, direction = 'top') => {
     let startSeat = seatNumber;
     let firstFoundSeat = null
 
@@ -129,15 +116,15 @@ const findVisibleSeatsInDirection = (seats, seatNumber = 40, interval = 10, dire
     }
 }
 
-const repopulateSeatsPart2 = (seats, interval, numberOfAdjustments = 0) => {
+const repopulateSeatsPart2 = (seats, interval) => {
     const directions = Object.keys(nextSeatNumberDirectionRules());
     let newSeats = [];
 
     while (true) {
-        newSeats = [...seats].reduce((acc, seat, index) => {
+        newSeats = seats.reduce((acc, seat, index) => {
             const seatNumber = index + 1;
             const allVisibleSeats = directions.reduce((a, direction) => {
-                const foundSeat = findVisibleSeatsInDirection(seats, seatNumber, interval, direction);
+                const foundSeat = getVisibleSeatsInDirection(seats, seatNumber, interval, direction);
                 if (foundSeat) {
                     a = [...a, foundSeat];
                 }
@@ -146,23 +133,19 @@ const repopulateSeatsPart2 = (seats, interval, numberOfAdjustments = 0) => {
             const occupiedSeats = allVisibleSeats.filter(seat => seat === '#');
 
             if (seat === 'L' && occupiedSeats.length === 0) {
-                numberOfAdjustments++;
                 return [...acc, '#'];
             } else if (seat === '#' && occupiedSeats.length >= 5) {
-                numberOfAdjustments++;
                 return [...acc, 'L'];
-            } else {
-                acc = [...acc, seat];
             }
 
-            return acc;
+            return [...acc, seat];
         }, []);
 
-        if (numberOfAdjustments === 0) {
+        if (JSON.stringify(seats) === JSON.stringify(newSeats)) {
             return newSeats;
         }
 
-        return repopulateSeatsPart2(newSeats, interval, 0);
+        return repopulateSeatsPart2(newSeats, interval);
     }
 }
 
@@ -184,7 +167,7 @@ const day11Solution = () => {
     }, {});
 
     console.time();
-    const finalSeats = repopulateSeats(input.seats, input.interval);
+    const finalSeats = repopulateSeatsPart1(input.seats, input.interval);
     const finalSeatsPart2 = repopulateSeatsPart2(input.seats, input.interval);
     console.timeEnd();
 
