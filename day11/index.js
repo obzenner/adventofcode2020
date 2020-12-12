@@ -72,8 +72,7 @@ const repopulateSeatsPart1 = (seats, interval) => {
 
     while (true) {
         newSeats = seats.reduce((acc, seat, index) => {
-            const adjacentSeats = getOccupiedAdjacentSeats(seats, interval, index + 1);
-            const occupiedSeatsNumber = adjacentSeats.filter(s => s === '#').length;
+            const occupiedSeatsNumber = getOccupiedAdjacentSeats(seats, interval, index + 1).length;
             
             if (seat === 'L' && occupiedSeatsNumber === 0) {
                 return [...acc, '#'];
