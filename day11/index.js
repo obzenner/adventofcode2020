@@ -51,8 +51,8 @@ const nextSeatNumberDirectionRules = (seatNumber, interval) => {
 };
 
 const getNextSeatIndex = (seatNumber, interval, direction) => {
-    const adjacentSeat = nextSeatNumberDirectionRules(seatNumber, interval)[direction];
-    return validator(seatNumber, adjacentSeat, direction, interval);
+    const adjacentSeatNumber = nextSeatNumberDirectionRules(seatNumber, interval)[direction];
+    return validator(seatNumber, adjacentSeatNumber, direction, interval);
 }
 
 // PART 1
