@@ -26,8 +26,8 @@ const getClosestDiff = ({ earliestTimestamp, timestamps }) => {
 }
 
 
-function findTimeStamp(busesWithX, buses) {
-    const busRecords = busesWithX.reduce((acc, bus, index) => {
+function findTimeStamp(buses) {
+    const busRecords = buses.reduce((acc, bus, index) => {
         if (bus !== 'x') {
             return [...acc, {
                 routeLength: Number(bus),
@@ -35,7 +35,7 @@ function findTimeStamp(busesWithX, buses) {
             }]
         }
         return acc;
-    }, []);
+    }, [])
 
     let multiplicator = 1;
 
