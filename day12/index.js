@@ -239,7 +239,6 @@ const getFinalDestinationWithWaypoint = (navInstrs) => {
 }
 
 const day12Solution = () => {
-    console.log('DAY 12')
     const rawInput = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8');
     const navigationInstructions = rawInput.split(/\n/).reduce((acc, instr) => {
         return [...acc, {
