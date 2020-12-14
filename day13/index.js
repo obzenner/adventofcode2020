@@ -10,9 +10,9 @@ const calcTimestampDiff = (testAgainst = 939, timestamp) => {
 };
 
 const getClosestDiff = ({ earliestTimestamp, timestamps }) => {
-    const filteredX = timestamps.filter(t => t !== 'x');
-    const minDiff = filteredX.reduce((acc, t) => {
-        const diff = calcTimestampDiff(earliestTimestamp, Number(t));
+    const minDiff = timestamps.reduce((acc, t) => {
+        const { routeLength } = t;
+        const diff = calcTimestampDiff(earliestTimestamp, routeLength);
         if (acc === 0) {
             acc = diff;
         } else {
@@ -25,47 +25,44 @@ const getClosestDiff = ({ earliestTimestamp, timestamps }) => {
     return minDiff;
 }
 
-
-function findTimeStamp(buses) {
-    const busRecords = buses.reduce((acc, bus, index) => {
-        if (bus !== 'x') {
-            return [...acc, {
-                routeLength: Number(bus),
-                offset: index
-            }]
-        }
-        return acc;
-    }, [])
-
-    let multiplicator = 1;
-
-    const finalTimestamp = busRecords.reduce((timestamp, busRecord) => {
-        const {offset, routeLength} = busRecord;
+function findTimeStampBayla(busRecords) {
+    const t = busRecords.reduce((acc, b) => {
+        const { offset, routeLength } = b;
+        let { timestamp, mult } = acc;
         let loop = true;
 
         while (loop) {
             if ((timestamp + offset) % routeLength === 0) {
-                multiplicator *= routeLength;
+                mult *= routeLength;
                 loop = false;
             } else {
-                timestamp += multiplicator;
+                timestamp += mult;
             }
         }
-        return timestamp;
-    }, 0);
+    
+        return {timestamp, mult};
+    }, {timestamp: 0, mult: 1})
 
-    return finalTimestamp;
+    return t;
 }
 
 const day13Solution = () => {
     const rawInput = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8').split(/\n/);
-    const input = {
+    const { earliestTimestamp, timestamps } = {
         earliestTimestamp: Number(rawInput[0]),
-        timestamps: rawInput[1].split(',')
-    }
+        timestamps: rawInput[1].split(',').reduce((acc, bus, index) => {
+            if (bus !== 'x') {
+                return [...acc, {
+                    routeLength: Number(bus),
+                    offset: index
+                }]
+            }
+            return acc;
+        }, [])
+    };
 
-    const minDiff = getClosestDiff(input);
-    const timestamp = findTimeStamp(input.timestamps, input.timestamps.filter(b => b !== 'x'))
+    const minDiff = getClosestDiff({earliestTimestamp, timestamps});
+    const { timestamp } = findTimeStampBayla(timestamps)
 
     return {
         part1: minDiff.timestamp * minDiff.minutes,
