@@ -67,7 +67,21 @@ const heapsPermutations = inputArray => {
 const numberOfPermutations = array => array.reduce((acc, e, i) => acc * (array.length - i), 1);
 
 
+const toBinary64 = (value) => {
+    if (!Number.isSafeInteger(value)) {
+      throw new TypeError('value must be a safe integer');
+    }
+  
+    const negative = value < 0;
+    const twosComplement = negative ? Number.MAX_SAFE_INTEGER + value + 1 : value;
+    const signExtend = negative ? '1' : '0';
+  
+    return twosComplement.toString(2).padStart(53, '0').padStart(64, signExtend);
+}
+
+
 module.exports = {
+    toBinary64,
     separateByEmptyLine,
     getUniqueValues,
     intersection,
