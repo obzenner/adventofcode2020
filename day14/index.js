@@ -51,6 +51,7 @@ const combinations = (n) => {
     return result;
 }
 
+// PART 2
 const combinationsOfMemAddresses = (XIndexes, initArray, maxValue = 1) => {
     const combs = combinations(XIndexes.length).reduce((acc, comb) => {
         const c = comb.split('').map(v => Number(v));
@@ -68,15 +69,6 @@ const combinationsOfMemAddresses = (XIndexes, initArray, maxValue = 1) => {
     }, []);
     
     return memAddrsStrings;
-}
-
-// PART 2
-const getCombinationsForFloatingAddresses = (bitmask, XIndexes) => {
-    const newMemoryAddresses = combinationsOfMemAddresses(XIndexes.sort((a, b) => a - b), Array.from(bitmask).map(v => {
-        return v === 'X' ? 0 : Number(v);
-    }));
-
-    return newMemoryAddresses;
 }
 
 const applyBitmaskToMemoryAddress = (bitmask, memoryAddress) => {
@@ -100,7 +92,9 @@ const applyBitmaskToMemoryAddress = (bitmask, memoryAddress) => {
         }
     }
 
-    return getCombinationsForFloatingAddresses(newMemoryAddressString, XIndexes);
+    return combinationsOfMemAddresses(XIndexes.sort((a, b) => a - b), Array.from(newMemoryAddressString).map(v => {
+        return v === 'X' ? 0 : Number(v);
+    }));
 };
 
 const decodeMemoryAddress = (bitmask, memoryAddress, value, memoryAddressMap) => {
