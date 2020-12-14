@@ -25,25 +25,24 @@ const getClosestDiff = ({ earliestTimestamp, timestamps }) => {
     return minDiff;
 }
 
-function findTimeStampBayla(busRecords) {
-    return busRecords.reduce((acc, b) => {
-        const { offset, routeLength } = b;
-        let { timestamp, mult } = acc;
-        let loop = true;
+// PART2 SIEVE
+function findTimeStamp(busRecords) {
+    let time = 0n;
+    let step = 1n;
 
-        while (loop) {
-            if ((timestamp + offset) % routeLength === 0) {
-                mult *= routeLength;
-                loop = false;
-            } else {
-                timestamp += mult;
-            }
+    for (let i = 0; i < busRecords.length; i++) {
+        const { offset, routeLength } = busRecords[i];
+        while ((time + offset) % routeLength) {
+            time += step;
         }
+        step *= routeLength;
+    }
 
-        return { timestamp, mult };
-    }, { timestamp: 0, mult: 1 })
+    return time;
 }
 
+
+// PART2 CRT
 const modInverse = (a, m) => {
     let g = gcd(a, m);
 
@@ -69,7 +68,6 @@ const gcd = (a, b) => {
     return gcd(b % a, a)
 }
 
-//chinese remainder theorem
 const chineseRemainderSolution = (pairs) => {
     const N = pairs.reduce((acc, p) => {
         return acc * p[0];
@@ -100,7 +98,13 @@ const day13Solution = () => {
     };
 
     const minDiff = getClosestDiff({ earliestTimestamp, timestamps });
-    const { timestamp } = findTimeStampBayla(timestamps)
+    const sieveTimestamp = findTimeStamp(timestamps
+        .map(b => {
+            return {
+                routeLength: BigInt(b.routeLength),
+                offset: BigInt(b.offset)
+            };
+    }))
     const chineseTheorem = chineseRemainderSolution(rawInput[1].split(",").reduce((acc, v, i) => {
         if (v !== 'x') {
             acc = [...acc, [BigInt(v), BigInt(i)]]
@@ -110,7 +114,8 @@ const day13Solution = () => {
 
     return {
         part1: minDiff.timestamp * minDiff.minutes,
-        part2: chineseTheorem
+        part2: chineseTheorem,
+        part2Sieve: sieveTimestamp
     }
 }
 
