@@ -26,7 +26,7 @@ const getClosestDiff = ({ earliestTimestamp, timestamps }) => {
 }
 
 function findTimeStampBayla(busRecords) {
-    const t = busRecords.reduce((acc, b) => {
+    return busRecords.reduce((acc, b) => {
         const { offset, routeLength } = b;
         let { timestamp, mult } = acc;
         let loop = true;
@@ -42,8 +42,6 @@ function findTimeStampBayla(busRecords) {
     
         return {timestamp, mult};
     }, {timestamp: 0, mult: 1})
-
-    return t;
 }
 
 const day13Solution = () => {
