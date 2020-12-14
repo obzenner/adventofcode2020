@@ -123,14 +123,6 @@ const runProgramsWithMemoryAddressDecoder = (bitmask, values, memoryAddressMap) 
 }
 
 const runProgramsPart2 = (programs) => {
-    const memoryAddressMap = Object.keys(programs).reduce((acc, bitmask) => {
-        const memAddrs = programs[bitmask];
-        for (let i = 0; i < programs[bitmask].length; i++) {
-            acc.set(memAddrs[i][0], memAddrs[i][1])
-        }
-        return acc;
-    }, new Map());
-
     const newMap = Object.keys(programs).reduce((acc, bitmask) => {
         const values = programs[bitmask];
         acc = runProgramsWithMemoryAddressDecoder(bitmask, values, acc);
