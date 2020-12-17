@@ -42,7 +42,7 @@ const day13Result = day13Solution();
 const day16Result = day16Solution();
 const day17Result = day17Solution();
 
-console.log(day17Result, day16Result)
+console.log(day17Result)
 
 // stuff
 // console.log(numberOfPermutations(Array(5).fill(0)))
