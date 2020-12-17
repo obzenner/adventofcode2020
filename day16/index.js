@@ -26,9 +26,7 @@ const isValueValid = (v, ticketsRules) => {
 
 const getInvalidValues = (ticket, ticketsRules) => {
     return ticket.reduce((acc, v) => {
-        if (!isValueValid(v, ticketsRules)) {
-            return [...acc, v];
-        }
+        if (!isValueValid(v, ticketsRules)) return [...acc, v];
         return acc;
     }, [])
 };
@@ -39,9 +37,7 @@ const getScanningErrorRate = (tickets, ticketsRules) => {
 
     tickets.forEach((ticket, k) => {
         const invalid = getInvalidValues(ticket, ticketsRules);
-        if (invalid.length) {
-            invalidTicketKeys = [...invalidTicketKeys, k]
-        }
+        if (invalid.length) invalidTicketKeys = [...invalidTicketKeys, k]
         invalidValues = [...invalidValues, ...invalid]
     });
     
@@ -57,9 +53,7 @@ const findCorrRules = (column, ticketsRules) => {
 
     ticketsRules.forEach((ruleSet, k) => {
         const hasAllValues = column.reduce((acc, v) => {
-            if (ruleSet.has(v)) {
-                return [...acc, v];
-            }
+            if (ruleSet.has(v)) return [...acc, v];
             return acc;
         }, []).length === column.length;
 
@@ -143,8 +137,6 @@ const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
         corrRulesAcc = [...corrRulesAcc, corrRules];
     });
 
-    console.log(corrRulesAcc, filterOutDuplicates(corrRulesAcc))
-
     return filterOutDuplicates(corrRulesAcc);
 }
 
@@ -176,9 +168,7 @@ const day16Solution = () => {
     const myTicket = tickets.get('my');
     const indexesOfDepartureRules = getOrderOfRulesInTickets(filteredTickets, ticketsRules)
     const multDepartureRuleValues = indexesOfDepartureRules.reduce((acc, rule, i) => {
-            if (rule.includes('departure')) {
-                acc *= myTicket[i];
-            }
+            if (rule.includes('departure')) acc *= myTicket[i];
             return acc;
         }, 1);
 
