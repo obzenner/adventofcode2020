@@ -118,10 +118,10 @@ HOW THIS WORKS:
  */
 const filterOutDuplicates = (array) => {
     return array.reduce((acc, v, index) => {
-        const shorter = acc.filter(l => l.length < v.length).flatMap(i => i);
-        const filtered = v.filter(j => !shorter.includes(j));
-        acc[index] = filtered;
-        return acc;
+        const shorter = acc.filter(l => l.length < v.length).flatMap(i => i); // step 2
+        const filtered = v.filter(j => !shorter.includes(j)); // step 3
+        acc[index] = filtered; // step 4
+        return acc; // step 5
     }, [...array]).flatMap(i => i)
 }
 
