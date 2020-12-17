@@ -21,9 +21,13 @@ const getInitCoordinates = (cubes, size = 3) => {
 const getNextCubeStatus = (isActive, numberOfActiveNeighbours) => {
     if (isActive && (numberOfActiveNeighbours === 2 || numberOfActiveNeighbours === 3)) {
         return '#';
-    } else {
-        return '.';
     }
+
+    if (!isActive && numberOfActiveNeighbours === 3) {
+        return '#'
+    }
+
+    return '.';
 }
 
 const getNeighbours = (cubeId, cube, cubeZ = 0, visibleGrid) => {
@@ -47,7 +51,7 @@ const getNeighbours = (cubeId, cube, cubeZ = 0, visibleGrid) => {
     const possibleY = possibleXY.map(v => v.y);
     const generatedInactiveCubes = possibleXY.reduce((acc, coords) => {
         const cube = { status: '.', coords };
-        acc.set(getCubeID(status, coords.x, coords.y), cube);
+        acc.set(getCubeID(cube.status, coords.x, coords.y), cube);
         return acc;
     }, new Map());
 
@@ -56,8 +60,9 @@ const getNeighbours = (cubeId, cube, cubeZ = 0, visibleGrid) => {
         const zIndex = possibleZ[i];
         const isSameZ = zIndex === cubeZ;
         const visibleCubes = visibleGrid.get(zIndex);
-
+        
         if (visibleCubes) {
+            console.log(visibleCubes, zIndex)
             let visibleNeighbours = new Map();
             let invisibleNeighbours = new Map();
 
@@ -87,14 +92,20 @@ const getNeighbours = (cubeId, cube, cubeZ = 0, visibleGrid) => {
     allNeighbours.forEach((v, k) => {
         const numberOfActive = [...v].filter(c => c[1].status === '#').length;
         numberOfActiveNeighbours += numberOfActive;
-
         const visibleGridValue = visibleGrid.get(k);
         const newIterGridValue = visibleGridValue ? new Map([...v].concat([...visibleGridValue])) : new Map([...v]);
         newVisibleGrid.set(k, newIterGridValue);
     });
 
+    
     const nextCubeStatus = getNextCubeStatus(isActive, numberOfActiveNeighbours);
-    newVisibleGrid.get(0).set(getCubeID(nextCubeStatus, coords.x, coords.y), {status: nextCubeStatus, coords});
+    console.log(cubeId, numberOfActiveNeighbours, nextCubeStatus)
+    console.log('________________')
+    const cubeZLevel = newVisibleGrid.get(cubeZ);
+    if (nextCubeStatus !== status) {
+        cubeZLevel.delete(cubeId);
+        cubeZLevel.set(getCubeID(nextCubeStatus, coords.x, coords.y), {status: nextCubeStatus, coords});
+    }
 
     return newVisibleGrid;
 };
@@ -108,30 +119,33 @@ const day17Solution = () => {
 
     const visibleGrid = new Map();
     visibleGrid.set(0, getInitCoordinates(initGrid, 3));
-    const testCubeValues = visibleGrid.get(0).get('.00');
-    const test = getNeighbours('.00', testCubeValues, 0, visibleGrid);
     
-    const runCycle = (grid) => {
-        //let finalGrid = grid;
-        // finalGrid.forEach((g, zIndex) => {
-        //     g.forEach((cube, cubeId) => {
-        //         finalGrid = getNeighbours(cubeId, cube, zIndex, finalGrid);
-        //     });
-        // });
+    const runCycle = (grid, numberOfCircles = 0) => {
+        let newGrid = grid;
 
-        const test = [...grid].reduce((acc, g) => {
-            const zIndex = g[0];
-            const zLevel = g[1];
+        while (numberOfCircles < 6) {
+            newGrid = [...newGrid].reduce((acc, g) => {
+                const zIndex = g[0];
+                const zLevel = g[1];
+    
+                zLevel.forEach((cube, cubeId) => {
+                    acc = getNeighbours(cubeId, cube, zIndex, acc);
+                });
 
-            zLevel.forEach((cube, cubeId) => {
-                acc = getNeighbours(cubeId, cube, zIndex, acc);
-            });
+                
+                return acc;
+            }, grid);
 
-            return acc;
-        }, grid);
+            return runCycle(newGrid, numberOfCircles + 1);
+        }
+
+        return newGrid;
+
     };
 
-    runCycle(visibleGrid)
+    // console.log('VG', visibleGrid)
+
+    const b = runCycle(visibleGrid);
 
     return {
         part1: null,
