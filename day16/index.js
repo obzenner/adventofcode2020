@@ -119,7 +119,7 @@ const filterOutDuplicates = (array) => {
     }, [...array]).flatMap(i => i)
 }
 
-const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
+const getPossibleValuesPerRule = (tickets) => {
     let possibleRuleValuesMap = new Map();
 
     tickets.forEach((v, k) => {
@@ -130,6 +130,12 @@ const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
             }
         });
     });
+
+    return possibleRuleValuesMap;
+}
+
+const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
+    const possibleRuleValuesMap = getPossibleValuesPerRule(tickets);
 
     let corrRulesAcc = [];
     possibleRuleValuesMap.forEach((column) => {
