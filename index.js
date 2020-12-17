@@ -21,6 +21,7 @@ const { day12Solution } = require('./day12/index');
 const { day13Solution } = require('./day13/index');
 const { day14Solution } = require('./day14/index');
 const { day15Solution } = require('./day15/index');
+const { day16Solution } = require('./day16/index');
 
 const day1Result = day1Solution();
 const day2Result = day2Solution();
@@ -35,10 +36,11 @@ const day10Result = day10Solution();
 // const day11Result = day11Solution();
 const day12Result = day12Solution();
 const day13Result = day13Solution();
-const day14Result = day14Solution();
-const day15Result = day15Solution();
+// const day14Result = day14Solution();
+// const day15Result = day15Solution();
+const day16Result = day16Solution();
 
-console.log(day15Result)
+console.log(day16Result)
 
 // stuff
 // console.log(numberOfPermutations(Array(5).fill(0)))
