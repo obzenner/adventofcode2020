@@ -92,10 +92,8 @@ const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
         });
     });
 
-    // for each record in possibleRuleValuesMap check which
     let corrRulesAcc = [];
     possibleRuleValuesMap.forEach((column) => {
-        // find the set that has all the values of this column
         const corrRules = findCorrRules(column, ticketsRules, corrRulesAcc);
         corrRulesAcc = [...corrRulesAcc, corrRules];
     });
