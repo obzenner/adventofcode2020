@@ -71,6 +71,51 @@ const findCorrRules = (column, ticketsRules) => {
     return corrRules;
 };
 
+/**
+Example input array:
+[
+    [ 'arrivalstation', 'zone' ],
+    [
+      'departuretime',
+      'arrivalstation',
+      'price',
+      'route',
+      'row',
+      'train',
+      'zone'
+    ],
+    [
+      'departurelocation',
+      'departureplatform',
+      'departuretrack',
+      'departuretime',
+      'arrivalstation',
+      'price',
+      'route',
+      'row',
+      'train',
+      'zone'
+    ],
+    [ 'arrivalstation', 'price', 'route', 'row', 'train', 'zone' ],
+    [
+      'departurelocation', 'departurestation',
+      'departureplatform', 'departuretrack',
+      'departuredate',     'departuretime',
+      'arrivalstation',    'arrivaltrack',
+      'class',             'price',
+      'route',             'row',
+      'seat',              'train',
+      'wagon',             'zone'
+    ]
+]
+
+HOW THIS WORKS:
+- 1. the reducer takes the input array as the accumulator.
+- 2. for each current value it finds all items in the accumulator that have less elements than the current value and makes an array of them
+- 3. it removes all the items from the current value that exist in the array from step 2
+- 4. it updates the current value in the accumulater with filtered out one
+- 5. re-runs this for the updated accumulator until all values only have unique keys
+ */
 const filterOutDuplicates = (array) => {
     return array.reduce((acc, v, index) => {
         const shorter = acc.filter(l => l.length < v.length).flatMap(i => i);
@@ -97,6 +142,8 @@ const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
         const corrRules = findCorrRules(column, ticketsRules, corrRulesAcc);
         corrRulesAcc = [...corrRulesAcc, corrRules];
     });
+
+    console.log(corrRulesAcc, filterOutDuplicates(corrRulesAcc))
 
     return filterOutDuplicates(corrRulesAcc);
 }
