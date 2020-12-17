@@ -134,16 +134,21 @@ const getPossibleValuesPerRule = (tickets) => {
     return possibleRuleValuesMap;
 }
 
-const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
-    const possibleRuleValuesMap = getPossibleValuesPerRule(tickets);
-
+const getPossibleFieldValues = (possibleRuleValuesMap, ticketsRules) => {
     let corrRulesAcc = [];
     possibleRuleValuesMap.forEach((column) => {
         const corrRules = findCorrRules(column, ticketsRules, corrRulesAcc);
         corrRulesAcc = [...corrRulesAcc, corrRules];
     });
 
-    return filterOutDuplicates(corrRulesAcc);
+    return corrRulesAcc;
+}
+
+const getOrderOfRulesInTickets = (tickets, ticketsRules) => {
+    const possibleRuleValuesMap = getPossibleValuesPerRule(tickets);
+    const possibleRulesForValuesAcc = getPossibleFieldValues(possibleRuleValuesMap, ticketsRules);
+
+    return filterOutDuplicates(possibleRulesForValuesAcc);
 }
 
 const day16Solution = () => {
