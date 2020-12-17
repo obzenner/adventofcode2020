@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require('path');
 
+// taken from https://ideone.com/s78tbT
+// https://www.reddit.com/r/adventofcode/comments/keqsfa/2020_day_17_solutions/gg56ijl/?utm_source=reddit&utm_medium=web2x&context=3
 const day17AltSolution = () => {
     const lines = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8').split('\n').filter(item => item);
     // Write your code here
