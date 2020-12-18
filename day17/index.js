@@ -4,148 +4,131 @@ const fs = require("fs");
 const path = require('path');
 
 
-const getCubeID = (status, x, y) => {
-    return `${status}${x}${y}`;
+const getCubeID = (x, y, z) => {
+    return `${x}${y}${z}`;
 }
 const getInitCoordinates = (cubes, size = 3) => {
     let y = 0;
 
     return cubes.reduce((acc, cube, i) => {
         if (i % size === 0) y += 1;   
-        const cubeObj = { status: cube, coords: {x: y - 1, y: i % size}};
-        acc.set(getCubeID(cube, y - 1, i % size), cubeObj);
+        const cubeObj = { status: cube, coords: {x: i % size, y: y - 1, z: 0} };
+        acc.set(getCubeID(i % size, y - 1, 0), cubeObj);
         return acc;
     }, new Map());
 };
 
-const getNextCubeStatus = (isActive, numberOfActiveNeighbours) => {
-    if (isActive && (numberOfActiveNeighbours === 2 || numberOfActiveNeighbours === 3)) {
-        return '#';
-    }
+const getPossibleXY = (x, y) => [
+    {x, y},
+    {x: x - 1, y},
+    {x: x + 1, y},
+    {x, y: y - 1},
+    {x, y: y + 1},
+    {x: x - 1, y: y - 1},
+    {x: x - 1, y: y + 1},
+    {x: x + 1, y: y - 1},
+    {x: x + 1, y: y + 1}
+];
 
-    if (!isActive && numberOfActiveNeighbours === 3) {
-        return '#'
-    }
+const getCube = ({ x, y, z }, plainDepth = 1, zDepth = 1, neighbours = []) => {
+    const self = {x, y, z};
 
-    return '.';
-}
-
-const getNeighbours = (cubeId, cube, cubeZ = 0, visibleGrid) => {
-    const {status, coords} = cube;
-    const isActive = status === '#';
-
-    const { x, y } = coords;
-    const possibleZ = [cubeZ, cubeZ - 1, cubeZ + 1];
-    const possibleXY = [
-        {x, y},
-        {x: x - 1, y},
-        {x: x + 1, y},
-        {x, y: y - 1},
-        {x, y: y + 1},
-        {x: x - 1, y: y - 1},
-        {x: x - 1, y: y + 1},
-        {x: x + 1, y: y - 1},
-        {x: x + 1, y: y + 1}
-    ];
-    const possibleX = possibleXY.map(v => v.x);
-    const possibleY = possibleXY.map(v => v.y);
-    const generatedInactiveCubes = possibleXY.reduce((acc, coords) => {
-        const cube = { status: '.', coords };
-        acc.set(getCubeID(cube.status, coords.x, coords.y), cube);
-        return acc;
-    }, new Map());
-
-    const allNeighbours = new Map();
-    for (let i = 0; i < possibleZ.length; i++) {
-        const zIndex = possibleZ[i];
-        const isSameZ = zIndex === cubeZ;
-        const visibleCubes = visibleGrid.get(zIndex);
-        
-        if (visibleCubes) {
-            console.log(visibleCubes, zIndex)
-            let visibleNeighbours = new Map();
-            let invisibleNeighbours = new Map();
-
-            visibleCubes.forEach((vc, key) => {
-                const sameCube = isSameZ && key === cubeId;
-                if (!sameCube && possibleX.includes(vc.coords.x) && possibleY.includes(vc.coords.y)) {
-                    visibleNeighbours.set(key, vc);
-                }
-            });
-
-            generatedInactiveCubes.forEach((gc, key) => {
-                const sameCube = isSameZ && key === cubeId;
-                const isVisibleNeighbour = visibleNeighbours.has(key);
-                if (!sameCube && !isVisibleNeighbour) {
-                    invisibleNeighbours.set(key, gc)
-                }
-            });
-            allNeighbours.set(zIndex, new Map([...visibleNeighbours, ...invisibleNeighbours]));
-        } else {
-            allNeighbours.set(zIndex, [...generatedInactiveCubes]);
+    for (let i = -zDepth; i <= zDepth; i++) {
+        const zCoord = z + i;
+        for (let j = 0; j < plainDepth; j++) {
+            const ln = { x: x - 1 - j, y, z: zCoord};
+            const rn = { x: x + 1 + j, y, z: zCoord};
+            const bn = { x, y: y + 1 + j, z: zCoord};
+            const tn = { x, y: y - 1 - j, z: zCoord};
+            const tln = { x: x - 1 - j, y: y - 1 - j, z: zCoord};
+            const trn = { x: x + 1 + j, y: y - 1 - j, z: zCoord};
+            const bln = { x: x - 1 - j, y: y + 1 + j, z: zCoord};
+            const brn = { x: x + 1 + j, y: y + 1 + j, z: zCoord};
+            neighbours = [...neighbours, ln, rn, bn, tn, tln, trn, bln, brn];
         }
     }
-    
-    let numberOfActiveNeighbours = 0;
-    const newVisibleGrid = new Map();
-    
-    allNeighbours.forEach((v, k) => {
-        const numberOfActive = [...v].filter(c => c[1].status === '#').length;
-        numberOfActiveNeighbours += numberOfActive;
-        const visibleGridValue = visibleGrid.get(k);
-        const newIterGridValue = visibleGridValue ? new Map([...v].concat([...visibleGridValue])) : new Map([...v]);
-        newVisibleGrid.set(k, newIterGridValue);
-    });
 
-    
-    const nextCubeStatus = getNextCubeStatus(isActive, numberOfActiveNeighbours);
-    console.log(cubeId, numberOfActiveNeighbours, nextCubeStatus)
-    console.log('________________')
-    const cubeZLevel = newVisibleGrid.get(cubeZ);
-    if (nextCubeStatus !== status) {
-        cubeZLevel.delete(cubeId);
-        cubeZLevel.set(getCubeID(nextCubeStatus, coords.x, coords.y), {status: nextCubeStatus, coords});
+    return [...neighbours, self];
+}
+
+const getNextStatus = (status, numberOfActiveNeighbours) => {
+    if (status === '#' && (numberOfActiveNeighbours === 2 || numberOfActiveNeighbours === 3)) return '#';
+    else if (status === '.' && numberOfActiveNeighbours === 3) return '#';
+    else return '.';
+}
+
+const getNeighbours = (cube, cubes) => {
+    const cubeId = cube[0];
+    const { coords, status } = cube[1];
+    const { x, y, z } = coords;
+    const theCube = getCube({ x, y, z });
+
+    let numberOfActiveNeighbours = 0;
+    const expandedCubes = theCube.reduce((acc, gCube) => {
+        const { x, y, z } = gCube;
+        const gId = getCubeID(x, y, z);
+        const exists = cubes.get(gId);
+        const isSelf = cubeId === gId;
+
+        if (exists) {
+            if (!isSelf && exists.status === '#') numberOfActiveNeighbours += 1;
+            return acc;
+        } else acc.set(gId, { status: '.', coords: { x, y, z}});
+        return acc;
+    }, new Map([...cubes]));
+
+    const nextStatusForCube = getNextStatus(status, numberOfActiveNeighbours);
+    // expandedCubes.set(cubeId, { status: nextStatusForCube, coords: { x, y, z }});
+
+    return {
+        expandedCubes,
+        nextStatusCube: {
+            cubeId,
+            nextStatusForCube
+        }
+    };
+}
+
+const runCycles = (cubes, currentCycle = 1, maxNumberOfCycles = 1) => {
+    while (currentCycle <= maxNumberOfCycles) {
+        let cubesToSimultaneouslyUpdate = [];
+
+        const newCubes = [...cubes].reduce((acc, currentCube) => {
+            const { expandedCubes, nextStatusCube } = getNeighbours(currentCube, acc);
+            acc = expandedCubes;
+            cubesToSimultaneouslyUpdate = [...cubesToSimultaneouslyUpdate, nextStatusCube];
+            return acc;
+        }, new Map([...cubes]));
+
+        
+        cubesToSimultaneouslyUpdate.forEach(({cubeId, nextStatusForCube}) => {
+            const { coords } = newCubes.get(cubeId);
+            newCubes.set(cubeId, { status: nextStatusForCube, coords })
+        });
+        
+        console.log(newCubes)
+        return runCycles(newCubes, currentCycle + 1)
     }
 
-    return newVisibleGrid;
+    return cubes;
 };
 
 const day17Solution = () => {
-    const initGrid = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8')
+    const initCubes = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8')
         .split(/\n/).reduce((acc, l) => {
             const cubes = l.split('');
             return [...acc, ...cubes];
         }, []);
 
-    const visibleGrid = new Map();
-    visibleGrid.set(0, getInitCoordinates(initGrid, 3));
-    
-    const runCycle = (grid, numberOfCircles = 0) => {
-        let newGrid = grid;
-
-        while (numberOfCircles < 6) {
-            newGrid = [...newGrid].reduce((acc, g) => {
-                const zIndex = g[0];
-                const zLevel = g[1];
-    
-                zLevel.forEach((cube, cubeId) => {
-                    acc = getNeighbours(cubeId, cube, zIndex, acc);
-                });
-
-                
-                return acc;
-            }, grid);
-
-            return runCycle(newGrid, numberOfCircles + 1);
+    const cubes = getInitCoordinates(initCubes, 3);
+    const newCubes = runCycles(cubes);
+    let nOfActive = 0;
+    newCubes.forEach((v, k) => {
+        if (v.status === '#') {
+            nOfActive += 1;
         }
-
-        return newGrid;
-
-    };
-
-    // console.log('VG', visibleGrid)
-
-    const b = runCycle(visibleGrid);
+    });
+    console.log(nOfActive)
 
     return {
         part1: null,
