@@ -43,9 +43,10 @@ const getCube = ({ x, y, z, w }, plainDepth = 1, zDepth = 1, wDepth = 0, neighbo
 }
 
 const evalStatus = (status, numberOfActiveNeighbours) => {
-    if (status === '#' && (numberOfActiveNeighbours === 2 || numberOfActiveNeighbours === 3)) return '#';
-    else if (status === '.' && numberOfActiveNeighbours === 3) return '#';
-    else return '.';
+    const shouldRemainActive = status === '#' && (numberOfActiveNeighbours === 2 || numberOfActiveNeighbours === 3);
+    const shouldBecomeActive = status === '.' && numberOfActiveNeighbours === 3;
+    if (shouldRemainActive || shouldBecomeActive) return '#';
+    else return '.'
 }
 
 const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
@@ -68,9 +69,11 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
             }
 
             if (exists) {
-                newNeighbours.set(pCId, { status: exists.status, coords: exists.coords, neighbours: exists.neighbours});
+                newNeighbours.set(pCId, exists)
             } else {
-                updatedState.set(pCId, { status: '.', coords: { x, y, z, w }, neighbours: new Map() })
+                const newRec = { status: '.', coords: { x, y, z, w }, neighbours: new Map() };
+                newNeighbours.set(pCId, newRec)
+                updatedState.set(pCId, newRec);
             }
         });
 
@@ -80,7 +83,7 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
     return updatedState;
 }
 
-const setNewState = (cubes, zDepth, wDepth) => {
+const setNewState = (cubes) => {
     cubes.forEach((cube, cubeId) => {
         const { status, coords, neighbours } = cube;
         let numberOfActive = 0;
@@ -88,24 +91,28 @@ const setNewState = (cubes, zDepth, wDepth) => {
         neighbours.forEach((n) => {
             if (n.status === '#') numberOfActive++;
         });
+
         const newStatusForCube = evalStatus(status, numberOfActive);
-        cubes.set(cubeId, { status: newStatusForCube, coords, neighbours});
+    
+        if (newStatusForCube === '.') {
+            cubes.delete(cubeId);
+        } else {
+            cubes.set(cubeId, { status: newStatusForCube, coords, neighbours: new Map()});
+        }
     });
 
-    const newCubes = getNewCubes(cubes, zDepth, wDepth);
-
-    return newCubes;
+    return cubes;
 }
 
 const runCycles = (cubes, zDepth = 1, wDepth = 0, currentCycle = 1, maxNumberOfCycles = 6) => {
     const initCubesWithNeighbours = getNewCubes(cubes, zDepth, wDepth);
-
+    
     while (currentCycle <= maxNumberOfCycles) {
         const newCubes = getNewCubes(initCubesWithNeighbours, zDepth, wDepth);
-        const newStateForCubes = setNewState(newCubes, zDepth, wDepth);
+        const newStateForCubes = setNewState(newCubes);
         return runCycles(newStateForCubes, zDepth, wDepth, currentCycle + 1)
     }
-    return cubes;
+    return cubes.size;
 };
 
 const day17Solution = () => {
@@ -117,28 +124,8 @@ const day17Solution = () => {
 
     const initActiveCubes = getInitActiveCubes(initCubes, 3);
 
-    const numberOfActiveCubes = (cubes) => {
-        const newStateForCubes = runCycles(cubes);
-    
-        let numberOfActiveCubes = 0;
-        newStateForCubes.forEach((v) => {
-            if (v.status === '#') numberOfActiveCubes++;
-        })
-
-        return numberOfActiveCubes;
-    }
-
-    const numberOfActiveCubesPt2 = (cubes) => {
-        const initStatePt2 = getNewCubes(cubes, 1, 1);
-        const newStateForCubesPt2 = runCycles(initStatePt2, 1, 1);
-    
-        let numberOfActiveCubesPt2 = 0;
-        newStateForCubesPt2.forEach((v) => {
-            if (v.status === '#') numberOfActiveCubesPt2++;
-        })
-
-        return numberOfActiveCubesPt2;
-    }
+    const numberOfActiveCubes = (cubes) => runCycles(cubes);
+    const numberOfActiveCubesPt2 = (cubes) => runCycles(cubes);
 
 
     return {
