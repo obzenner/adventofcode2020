@@ -8,6 +8,7 @@ const getInitActiveCubes = (cubes, size = 3) => {
 
     return cubes.reduce((acc, cube, i) => {
         if (i % size === 0) y += 1;   
+        if (cube === '.') return acc;
         const cubeObj = { status: cube, coords: {x: i % size, y: y - 1, z: 0, w: 0}, neighbours: new Map() };
         acc.set(getCubeID(i % size, y - 1, 0, 0), cubeObj);
         return acc;
@@ -56,26 +57,24 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
         const neighboursCube = getCube({ x, y, z, w }, 1, zDepth, wDepth);
        
         let newNeighbours = new Map();
-        updatedState = [...neighboursCube].reduce((acc, pC) => {
+        [...neighboursCube].forEach(pC => {
             const { x, y, z, w } = pC;
             const pCId = getCubeID(x, y, z, w);
             const exists = cubes.get(pCId);
             const cubeStatus = exists ? exists.status : '.';
             const isSelf = cubeId === pCId;
 
-            if (!isSelf) {
-                if (exists) {
-                    newNeighbours.set(pCId, { status: cubeStatus, coords: { x, y, z, w }, neighbours: exists.neighbours});
-                } else {
-                    newNeighbours.set(pCId, { status: cubeStatus, coords: { x, y, z, w }, neighbours: new Map()});
-                }
+            if (isSelf) {
+                return;
             }
 
-            if (!exists && !isSelf) {
-                acc.set(pCId, { status: cubeStatus, coords: { x, y, z, w }, neighbours: new Map() })
+            if (exists) {
+                newNeighbours.set(pCId, { status: cubeStatus, coords: exists.coords, neighbours: exists.neighbours});
+            } else {
+                updatedState.set(pCId, { status: cubeStatus, coords: { x, y, z, w }, neighbours: new Map() })
             }
-            return acc;
-        }, updatedState);
+        });
+
         updatedState.set(cubeId, { status, coords, neighbours: newNeighbours });
     });
 
@@ -105,8 +104,10 @@ const setNewState = (cubes, zDepth, wDepth) => {
 }
 
 const runCycles = (cubes, zDepth = 1, wDepth = 0, currentCycle = 1, maxNumberOfCycles = 6) => {
+    const initCubesWithNeighbours = getNewCubes(cubes, zDepth, wDepth);
+
     while (currentCycle <= maxNumberOfCycles) {
-        const newCubes = getNewCubes(cubes, zDepth, wDepth);
+        const newCubes = getNewCubes(initCubesWithNeighbours, zDepth, wDepth);
         const newStateForCubes = setNewState(newCubes, zDepth, wDepth);
         return runCycles(newStateForCubes, zDepth, wDepth, currentCycle + 1)
     }
@@ -120,11 +121,10 @@ const day17Solution = () => {
             return [...acc, ...cubes];
         }, []);
 
-    const cubes = getInitActiveCubes(initCubes, 3);
+    const initActiveCubes = getInitActiveCubes(initCubes, 3);
 
     const numberOfActiveCubes = (cubes) => {
-        const initState = getNewCubes(cubes);
-        const newStateForCubes = runCycles(initState);
+        const newStateForCubes = runCycles(cubes);
     
         let numberOfActiveCubes = 0;
         newStateForCubes.forEach((v) => {
@@ -148,8 +148,8 @@ const day17Solution = () => {
 
 
     return {
-        part1: numberOfActiveCubes(cubes),
-        part2: numberOfActiveCubesPt2(cubes)
+        part1: numberOfActiveCubes(initActiveCubes),
+        // part2: numberOfActiveCubesPt2(initActiveCubes)
     }
 }
 
