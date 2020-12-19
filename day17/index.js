@@ -114,14 +114,13 @@ const day17Solution = () => {
 
     const newStateForCubes = runCycles(initGameOfLifeState);
 
-    let meh = 0;
+    let numberOfActiveCubes = 0;
     newStateForCubes.forEach((v) => {
-        if (v.status === '#') meh++;
+        if (v.status === '#') numberOfActiveCubes++;
     })
-    console.log(meh)
 
     return {
-        part1: null,
+        part1: numberOfActiveCubes,
         part2: null
     }
 }
