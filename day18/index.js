@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require('path');
 
-// Please forgive me, that's all I can do when I don't feel like googling
+// Please forgive me, that's all I can do when I don't feel like googling regex
 const explodeFuckingBrackets = (line) => {
     return line.split(' ').reduce((acc, v) => {
         if (v !== ' ') {
@@ -22,40 +22,13 @@ const explodeFuckingBrackets = (line) => {
     }, []);
 };
 
-const calcLevel = (level) => {
-    let op = '+';
-    const value = level.reduce((acc, item, ind) => {
-        const { i, v } = item;
-
-        if (ind === 0) {
-            return acc;
-        }
-
-        switch (v) {
-            case '+':
-                op = '+';
-                return acc;
-            case '*':
-                op = '*'; 
-                return acc;
-            default:
-                acc = op === '+' ? acc + Number(v) : acc * Number(v);
-        }
-
-        return acc;
-    }, Number(level[0].v));
-
-    const splitIndexes = [level[0].i - 1,  level[level.length - 1].i + 1]
-    return { value, splitIndexes }
-}
-
-
 const getNewLine = (testLine, value) => {
     const firstArr = testLine.slice(0, value.splitIndexes[0]);
     const secondArr = testLine.slice(value.splitIndexes[1] + 1, testLine.length);
     return [...firstArr, value.value, ...secondArr];
 };
 
+// find lowest level bracket
 const calcBracket = (testLine) => {
     const brackets = ['(', ')']
 
@@ -93,6 +66,33 @@ const calcBracket = (testLine) => {
     return findNotNested(testLine);
 }
 
+const calcLevel = (level) => {
+    let opMemo = '+';
+    const value = level.reduce((acc, item, ind) => {
+        const { i, v } = item;
+
+        if (ind === 0) {
+            return acc;
+        }
+
+        switch (v) {
+            case '+':
+                opMemo = '+';
+                return acc;
+            case '*':
+                opMemo = '*'; 
+                return acc;
+            default:
+                acc = opMemo === '+' ? acc + Number(v) : acc * Number(v);
+        }
+
+        return acc;
+    }, Number(level[0].v));
+
+    const splitIndexes = [level[0].i - 1,  level[level.length - 1].i + 1]
+    return { value, splitIndexes }
+}
+
 const calcAllBrackets = (testLine) => {
     const bracket = calcBracket(testLine);
 
@@ -107,6 +107,59 @@ const calcAllBrackets = (testLine) => {
     })
 }
 
+// part 2
+const doOperation = (level, op) => {
+    let temp = [];
+    let shifter = [...level];
+    let lastValueToOp = null;
+
+    for (let j = 0; j < level.length; j++) {
+        const { i, v } = shifter[j];
+
+        if (v === op) {
+            const value = op === '+' ? Number(lastValueToOp) + Number(shifter[j + 1].v)
+                : Number(lastValueToOp.v) * Number(shifter[j + 1].v);
+            lastValueToOp = value;
+            j++;
+            temp.pop();
+            temp = [...temp, value];
+        } else {
+            lastValueToOp = shifter[j].v;
+            temp = [...temp, shifter[j].v];
+        }
+    }
+    return [...temp];
+}
+
+const calcLevelWithDiffPrecedence = (level) => {
+    const additionResult = doOperation(level, '+');
+    const multiplicationResult = additionResult.reduce((acc, v) => {
+        if (v !== '*') {
+            acc *= Number(v);
+        }
+        return acc;
+    }, 1);
+
+    const splitIndexes = [level[0].i - 1,  level[level.length - 1].i + 1]
+    return { value: multiplicationResult, splitIndexes }
+}
+
+const calcAllBracketsWithDiffPrecedence = (testLine) => {
+    const bracket = calcBracket(testLine);
+
+    while (bracket.length > 0) {
+        const nestedValue = calcLevelWithDiffPrecedence(bracket);
+        const newLine = getNewLine(testLine, nestedValue)
+        return calcAllBracketsWithDiffPrecedence(newLine);
+    }
+    
+    return testLine.map((v, i) => {
+        return { i, v }
+    })
+}
+
+
+// Part 1
 const calcAllLines = (rawLines) => {
     const calc = rawLines.reduce((acc, line) => {
         const explodedLine = explodeFuckingBrackets(line);
@@ -116,18 +169,33 @@ const calcAllLines = (rawLines) => {
         return acc;
     }, 0)
 
-    console.log(calc)
+    return calc;
 }
+
+// Part 2
+const calcAllLinesPt2 = (rawLines) => {
+    const calc = rawLines.reduce((acc, line) => {
+        const explodedLine = explodeFuckingBrackets(line);
+        const finalLine = calcAllBracketsWithDiffPrecedence(explodedLine);
+        const finalCalc = calcLevelWithDiffPrecedence(finalLine);
+        acc += finalCalc.value;
+        return acc;
+    }, 0)
+
+    return calc;
+}
+
 
 const day18Solution = () => {
     const raw = fs.readFileSync(path.join(__dirname + '/input.txt'), 'utf8').split(/\n/);
 
     const resPt1 = calcAllLines(raw);
+    const resPt2 = calcAllLinesPt2(raw);
 
 
     return {
         part1: resPt1,
-        part2: null
+        part2: resPt2
     }
 }
 
