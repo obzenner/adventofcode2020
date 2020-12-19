@@ -50,6 +50,7 @@ const evalStatus = (status, numberOfActiveNeighbours) => {
 
 const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
     let updatedState = new Map([...cubes]);
+
     cubes.forEach((v, cubeId) => {
         const { coords, status } = v;
         const { x, y, z, w } = coords;
@@ -88,12 +89,7 @@ const setNewState = (cubes, zDepth, wDepth) => {
             if (n.status === '#') numberOfActive++;
         });
         const newStatusForCube = evalStatus(status, numberOfActive);
-    
-        if (newStatusForCube === '.') {
-            cubes.delete(cubeId);
-        } else {
-            cubes.set(cubeId, { status: newStatusForCube, coords, neighbours});
-        }
+        cubes.set(cubeId, { status: newStatusForCube, coords, neighbours});
     });
 
     const newCubes = getNewCubes(cubes, zDepth, wDepth);
