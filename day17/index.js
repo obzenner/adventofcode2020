@@ -5,7 +5,6 @@ const path = require('path');
 
 const getInitActiveCubes = (cubes, size = 3) => {
     let y = 0;
-
     return cubes.reduce((acc, cube, i) => {
         if (i % size === 0) y += 1;   
         if (cube === '.') return acc;
@@ -57,11 +56,10 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
         const neighboursCube = getCube({ x, y, z, w }, 1, zDepth, wDepth);
        
         let newNeighbours = new Map();
-        [...neighboursCube].forEach(pC => {
+        neighboursCube.forEach(pC => {
             const { x, y, z, w } = pC;
             const pCId = getCubeID(x, y, z, w);
             const exists = cubes.get(pCId);
-            const cubeStatus = exists ? exists.status : '.';
             const isSelf = cubeId === pCId;
 
             if (isSelf) {
@@ -69,9 +67,9 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
             }
 
             if (exists) {
-                newNeighbours.set(pCId, { status: cubeStatus, coords: exists.coords, neighbours: exists.neighbours});
+                newNeighbours.set(pCId, { status: exists.status, coords: exists.coords, neighbours: exists.neighbours});
             } else {
-                updatedState.set(pCId, { status: cubeStatus, coords: { x, y, z, w }, neighbours: new Map() })
+                updatedState.set(pCId, { status: '.', coords: { x, y, z, w }, neighbours: new Map() })
             }
         });
 
