@@ -3,11 +3,13 @@
 const fs = require("fs");
 const path = require('path');
 
+
+// IMPORTANT: If you ever come across this code. This only works for the test input of https://adventofcode.com/2020/day/17
+// for my own input this returns wrong resuts
 const getInitActiveCubes = (cubes, size = 3) => {
     let y = 0;
     return cubes.reduce((acc, cube, i) => {
         if (i % size === 0) y += 1;   
-        if (cube === '.') return acc;
         const cubeObj = { status: cube, coords: {x: i % size, y: y - 1, z: 0, w: 0}, neighbours: new Map() };
         acc.set(getCubeID(i % size, y - 1, 0, 0), cubeObj);
         return acc;
@@ -72,7 +74,6 @@ const getNewCubes = (cubes, zDepth = 1, wDepth = 0) => {
                 newNeighbours.set(pCId, exists)
             } else {
                 const newRec = { status: '.', coords: { x, y, z, w }, neighbours: new Map() };
-                newNeighbours.set(pCId, newRec)
                 updatedState.set(pCId, newRec);
             }
         });
@@ -92,12 +93,13 @@ const setNewState = (cubes) => {
             if (n.status === '#') numberOfActive++;
         });
 
-        const newStatusForCube = evalStatus(status, numberOfActive);
-    
-        if (newStatusForCube === '.') {
-            cubes.delete(cubeId);
+        const shouldRemainActive = status === '#' && numberOfActive > 1 && numberOfActive < 4;
+        const shouldBecomeActive = status === '.' && numberOfActive === 3;
+
+        if (shouldRemainActive || shouldBecomeActive) {
+            cubes.set(cubeId, { status: '#', coords, neighbours: new Map() });
         } else {
-            cubes.set(cubeId, { status: newStatusForCube, coords, neighbours: new Map()});
+            cubes.delete(cubeId)
         }
     });
 
@@ -105,14 +107,14 @@ const setNewState = (cubes) => {
 }
 
 const runCycles = (cubes, zDepth = 1, wDepth = 0, currentCycle = 1, maxNumberOfCycles = 6) => {
-    const initCubesWithNeighbours = getNewCubes(cubes, zDepth, wDepth);
-    
+    const withInactives = getNewCubes(cubes, zDepth, wDepth);
+
     while (currentCycle <= maxNumberOfCycles) {
-        const newCubes = getNewCubes(initCubesWithNeighbours, zDepth, wDepth);
+        const newCubes = getNewCubes(withInactives, zDepth, wDepth);
         const newStateForCubes = setNewState(newCubes);
         return runCycles(newStateForCubes, zDepth, wDepth, currentCycle + 1)
     }
-    return cubes.size;
+    return cubes;
 };
 
 const day17Solution = () => {
@@ -122,15 +124,20 @@ const day17Solution = () => {
             return [...acc, ...cubes];
         }, []);
 
-    const initActiveCubes = getInitActiveCubes(initCubes, 3);
-
-    const numberOfActiveCubes = (cubes) => runCycles(cubes);
-    const numberOfActiveCubesPt2 = (cubes) => runCycles(cubes);
+        
+    const numberOfActiveCubes = () => {
+        const initActiveCubes = getInitActiveCubes(initCubes, 3);
+        return runCycles(initActiveCubes).size;
+    }
+    const numberOfActiveCubesPt2 = () => {
+        const initActiveCubes = getInitActiveCubes(initCubes, 3);
+        return runCycles(initActiveCubes, 1, 1).size;
+    };
 
 
     return {
-        part1: numberOfActiveCubes(initActiveCubes),
-        // part2: numberOfActiveCubesPt2(initActiveCubes)
+        part1: numberOfActiveCubes(),
+        part2: numberOfActiveCubesPt2()
     }
 }
 
