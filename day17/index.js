@@ -8,7 +8,7 @@ const getInitActiveCubes = (cubes, size = 3) => {
 
     return cubes.reduce((acc, cube, i) => {
         if (i % size === 0) y += 1;   
-        const cubeObj = { status: cube, coords: {x: i % size, y: y - 1, z: 0}, neighbours: [] };
+        const cubeObj = { status: cube, coords: {x: i % size, y: y - 1, z: 0}, neighbours: new Map() };
         acc.set(getCubeID(i % size, y - 1, 0), cubeObj);
         return acc;
     }, new Map());
